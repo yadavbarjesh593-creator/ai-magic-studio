@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
-
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 void main() {
   runApp(const AIMagicStudio());
 }
@@ -428,17 +429,23 @@ class SimplePage extends StatelessWidget {
                     itemCount: items.length,
                     itemBuilder: (context, index) {
                       return Card(
-                        color: const Color(0xFF211B35),
-                        child: ListTile(
-                          leading: Icon(icon,
-                              color: const Color(0xFFB77CFF)),
-                          title: Text(items[index]),
-                          trailing: const Icon(
-                            Icons.arrow_forward_ios,
-                            size: 16,
-                          ),
-                        ),
-                      );
+  color: const Color(0xFF211B35),
+  child: ListTile(
+    leading: Icon(icon, color: Color(0xFFB77CFF)),
+    title: Text(items[index]),
+    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => EffectDetailPage(
+            title: items[index],
+          ),
+        ),
+      );
+    },
+  ),
+);
                     },
                   ),
           ),
@@ -447,3 +454,111 @@ class SimplePage extends StatelessWidget {
     );
   }
 }
+
+class EffectDetailPage extends StatefulWidget {
+  final String title;
+
+  const EffectDetailPage({
+    super.key,
+    required this.title,
+  });
+
+  @override
+  State<EffectDetailPage> createState() =>
+      _EffectDetailPageState();
+}
+
+class _EffectDetailPageState extends State<EffectDetailPage> {
+  final ImagePicker _picker = ImagePicker();
+  XFile? _selectedImage;
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 90,
+      );
+
+      if (image != null && mounted) {
+        setState(() {
+          _selectedImage = image;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        backgroundColor: const Color(0xFF100D20),
+      ),
+      backgroundColor: const Color(0xFF100D20),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (_selectedImage != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.file(
+                    File(_selectedImage!.path),
+                    height: 300,
+                    width: double.infinity,
+                    fit: BoxFit.contain,
+                  ),
+                )
+              else
+                const Icon(
+                  Icons.add_a_photo,
+                  size: 90,
+                  color: Colors.white54,
+                ),
+
+              const SizedBox(height: 25),
+
+              Text(
+                _selectedImage == null
+                    ? 'Select Your Photo'
+                    : 'Photo Selected Successfully!',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 25),
+
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton.icon(
+                  onPressed: _pickImage,
+                  icon: const Icon(Icons.upload),
+                  label: const Text('Select Photo'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF8B5CFF),
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+  
