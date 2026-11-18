@@ -474,7 +474,12 @@ class EffectDetailPage extends StatefulWidget {
 class _EffectDetailPageState extends State<EffectDetailPage> {
   final ImagePicker _picker = ImagePicker();
   XFile? _selectedImage;
+  final SelfieSegmenter _segmenter = SelfieSegmenter(
+    mode: SegmenterMode.single,
+    enableRawSizeMask: true,
+  );
 
+  bool _isProcessing = false;
   Future<void> _pickImage() async {
     try {
       final XFile? image = await _picker.pickImage(
