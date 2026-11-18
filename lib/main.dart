@@ -455,6 +455,7 @@ class SimplePage extends StatelessWidget {
   }
 }
 
+
 class EffectDetailPage extends StatefulWidget {
   final String title;
 
@@ -486,79 +487,135 @@ class _EffectDetailPageState extends State<EffectDetailPage> {
       }
     } catch (e) {
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
     }
   }
 
+  void _applyEffect(String effect) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$effect AI processing will be added soon!'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final effects = [
+      'AI Portrait',
+      'Cartoon Effect',
+      'Background Remove',
+      'Background Blur',
+      'AI Beauty',
+      'Photo Animation',
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
         backgroundColor: const Color(0xFF100D20),
       ),
       backgroundColor: const Color(0xFF100D20),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (_selectedImage != null)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.file(
-                    File(_selectedImage!.path),
-                    height: 300,
-                    width: double.infinity,
-                    fit: BoxFit.contain,
-                  ),
-                )
-              else
-                const Icon(
-                  Icons.add_a_photo,
-                  size: 90,
-                  color: Colors.white54,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            if (_selectedImage != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.file(
+                  File(_selectedImage!.path),
+                  height: 280,
+                  width: double.infinity,
+                  fit: BoxFit.contain,
                 ),
+              )
+            else
+              const Icon(
+                Icons.add_a_photo,
+                size: 90,
+                color: Colors.white54,
+              ),
 
-              const SizedBox(height: 25),
+            const SizedBox(height: 20),
 
-              Text(
-                _selectedImage == null
-                    ? 'Select Your Photo'
-                    : 'Photo Selected Successfully!',
-                style: const TextStyle(
+            Text(
+              _selectedImage == null
+                  ? 'Select Your Photo'
+                  : 'Photo Selected Successfully!',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton.icon(
+                onPressed: _pickImage,
+                icon: const Icon(Icons.upload),
+                label: const Text('Select Photo'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF8B5CFF),
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 25),
+
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Choose Your Effect',
+                style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
+            ),
 
-              const SizedBox(height: 25),
+            const SizedBox(height: 15),
 
-              SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton.icon(
-                  onPressed: _pickImage,
-                  icon: const Icon(Icons.upload),
-                  label: const Text('Select Photo'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8B5CFF),
-                    foregroundColor: Colors.white,
-                  ),
-                ),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: effects.length,
+              gridDelegate:
+                  const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.7,
               ),
-            ],
-          ),
+              itemBuilder: (context, index) {
+                return ElevatedButton(
+                  onPressed: _selectedImage == null
+                      ? null
+                      : () => _applyEffect(effects[index]),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF29213F),
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor:
+                        const Color(0xFF29213F),
+                  ),
+                  child: Text(
+                    effects[index],
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
-
-  
