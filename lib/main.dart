@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:google_mlkit_selfie_segmentation/google_mlkit_selfie_segmentation.dart';
 void main() {
   runApp(const AIMagicStudio());
 }
