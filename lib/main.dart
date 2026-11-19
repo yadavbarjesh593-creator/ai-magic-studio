@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_mlkit_selfie_segmentation/google_mlkit_selfie_segmentation.dart';
 import 'package:image/image.dart' as img;
+import 'package:google_mlkit_commons/google_mlkit_commons.dart';
+import 'package:gal/gal.dart';
 void main() {
   runApp(const AIMagicStudio());
 }
@@ -338,53 +340,23 @@ class EffectsPage extends StatelessWidget {
       items: [
         'AI Portrait',
         'Cartoon Effect',
-        'Cinematic Effect',
+        'Background Remove',
         'Background Blur',
         'AI Beauty',
         'Photo Animation',
       ],
+      isEffectsPage: true,
     );
   }
 }
 
-class ProjectsPage extends StatelessWidget {
-  const ProjectsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const SimplePage(
-      title: 'My Projects',
-      subtitle: 'Your saved creations will appear here.',
-      icon: Icons.folder_open,
-      items: [],
-    );
-  }
-}
-
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const SimplePage(
-      title: 'My Profile',
-      subtitle: 'Welcome to AI Magic Studio',
-      icon: Icons.account_circle,
-      items: [
-        'Account Settings',
-        'App Settings',
-        'Privacy Policy',
-        'About Us',
-      ],
-    );
-  }
-}
 
 class SimplePage extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
   final List<String> items;
+  final bool isEffectsPage;
 
   const SimplePage({
     super.key,
@@ -392,6 +364,7 @@ class SimplePage extends StatelessWidget {
     required this.subtitle,
     required this.icon,
     required this.items,
+    this.isEffectsPage = false,
   });
 
   @override
@@ -431,23 +404,32 @@ class SimplePage extends StatelessWidget {
                     itemCount: items.length,
                     itemBuilder: (context, index) {
                       return Card(
-  color: const Color(0xFF211B35),
-  child: ListTile(
-    leading: Icon(icon, color: Color(0xFFB77CFF)),
-    title: Text(items[index]),
-    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => EffectDetailPage(
-            title: items[index],
-          ),
-        ),
-      );
-    },
-  ),
-);
+                        color: const Color(0xFF211B35),
+                        child: ListTile(
+                          leading: Icon(
+                            icon,
+                            color: const Color(0xFFB77CFF),
+                          ),
+                          title: Text(items[index]),
+                          trailing: const Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                          ),
+                          onTap: () {
+                            if (isEffectsPage) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      EffectDetailPage(
+                                    title: items[index],
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      );
                     },
                   ),
           ),
@@ -456,6 +438,7 @@ class SimplePage extends StatelessWidget {
     );
   }
 }
+
 
 
 class EffectDetailPage extends StatefulWidget {
