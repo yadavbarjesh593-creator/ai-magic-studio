@@ -483,6 +483,100 @@ class _EffectDetailPageState extends State<EffectDetailPage> {
     }
   }
 
+Future<void> _applyBackgroundBlur() async {
+  if (_selectedImage == null || _isProcessing) return;
+
+  setState(() {
+    _isProcessing = true;
+  });
+
+  try {
+    final inputImage =
+        InputImage.fromFilePath(_selectedImage!.path);
+
+    final mask = await _segmenter.processImage(inputImage);
+
+    if (mask == null) {
+      throw Exception('Person detect nahi ho paya');
+    }
+
+    final bytes =
+        await File(_selectedImage!.path).readAsBytes();
+
+    final original = img.decodeImage(bytes);
+
+    if (original == null) {
+      throw Exception('Photo open nahi ho payi');
+    }
+
+    final blurred = img.gaussianBlur(
+      original.clone(),
+      radius: 12,
+    );
+
+    final result = original.clone();
+
+    for (int y = 0; y < original.height; y++) {
+      for (int x = 0; x < original.width; x++) {
+        final maskX = (x * mask.width / original.width)
+            .floor()
+            .clamp(0, mask.width - 1)
+            .toInt();
+
+        final maskY = (y * mask.height / original.height)
+            .floor()
+            .clamp(0, mask.height - 1)
+            .toInt();
+
+        final confidence =
+            mask.confidences[maskY * mask.width + maskX];
+
+        final blend =
+            ((confidence - 0.35) / 0.30).clamp(0.0, 1.0);
+
+        final originalPixel = original.getPixel(x, y);
+        final blurredPixel = blurred.getPixel(x, y);
+
+        final r = blurredPixel.r * (1 - blend) +
+            originalPixel.r * blend;
+
+        final g = blurredPixel.g * (1 - blend) +
+            originalPixel.g * blend;
+
+        final b = blurredPixel.b * (1 - blend) +
+            originalPixel.b * blend;
+
+        result.setPixelRgb(x, y, r, g, b);
+      }
+    }
+
+    await Gal.putImageBytes(
+      img.encodeJpg(result, quality: 95),
+      name: 'background_blur',
+    );
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Background Blur Gallery mein save ho gaya!'),
+      ),
+    );
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
+    );
+  } finally {
+    if (mounted) {
+      setState(() {
+        _isProcessing = false;
+      });
+    }
+  }
+}
+
   void _applyEffect(String effect) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -490,7 +584,11 @@ class _EffectDetailPageState extends State<EffectDetailPage> {
       ),
     );
   }
-
+@override
+void dispose() {
+  _segmenter.close();
+  super.dispose();
+}
   @override
   Widget build(BuildContext context) {
     final effects = [
@@ -587,9 +685,15 @@ class _EffectDetailPageState extends State<EffectDetailPage> {
               ),
               itemBuilder: (context, index) {
                 return ElevatedButton(
-                  onPressed: _selectedImage == null
-                      ? null
-                      : () => _applyEffect(effects[index]),
+                  onPressed: _selectedImage == null || _isProcessing
+    ? null
+    : () {
+        if (effects[index] == 'Background Blur') {
+          _applyBackgroundBlur();
+        } else {
+          _applyEffect(effects[index]);
+        }
+      },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF29213F),
                     foregroundColor: Colors.white,
