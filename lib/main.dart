@@ -350,6 +350,38 @@ class EffectsPage extends StatelessWidget {
   }
 }
 
+class ProjectsPage extends StatelessWidget {
+  const ProjectsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const SimplePage(
+      title: 'My Projects',
+      subtitle: 'Your saved AI creations',
+      icon: Icons.folder,
+      items: [],
+    );
+  }
+}
+
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const SimplePage(
+      title: 'My Profile',
+      subtitle: 'Manage your profile',
+      icon: Icons.person,
+      items: [
+        'Account Settings',
+        'App Settings',
+        'About AI Magic Studio',
+      ],
+    );
+  }
+}
+
 
 class SimplePage extends StatelessWidget {
   final String title;
